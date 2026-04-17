@@ -2,6 +2,8 @@
 
 > Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Converts inbox notes, ideas, or raw topics into fully scoped briefs.
 
+**Version:** 0.0.1
+
 ## Installation
 
 ```bash

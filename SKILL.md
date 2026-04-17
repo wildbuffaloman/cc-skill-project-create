@@ -1,6 +1,6 @@
 ---
 name: project-create
-description: Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Converts inbox notes, ideas, or raw topics into fully scoped briefs.
+version: "0.0.1"description: Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Converts inbox notes, ideas, or raw topics into fully scoped briefs.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
 ---
@@ -241,3 +241,12 @@ Summarize what was linked:
 - Log format: one item per row with Date, Type, and Update columns. Type is Task or Milestone.
 - Waiting For: only items from other people or agents. Self-tasks go in Next Actions.
 - All typed relationships go in YAML frontmatter as wikilinks per vault root CLAUDE.md Graph-Ready Conventions. Use `owner: "[[Name]]"`, `parent: "[[Program]]"`, and arrays for `depends_on`, `feeds`, `learns_from`. No inline Dataview fields in the body. Dependencies and AI Ecosystem sections contain human-readable context only (lists, tables, descriptions).
+- **AREA is required** and must be a wikilink to a known area. The vault has area categories (folder groupings) and areas (the actual entities). Never put a category in the AREA field.
+  - Valid AREA values: `[[01 HEALTH]]`, `[[01 THE DUHAUS]]`, `[[The Unschool]]`, `[[ADM - AED Mastermind]]`, `[[BUFFALO 4]]`, `[[DUVOG]]`, `[[FORO YPO]]`, `[[MENTORING]]`, `[[BUFALINDA]]`, `[[DAG]]`, `[[SATORI LLC]]`, `[[WEALTH MANAGEMENT]]`, `[[04 AI & SOFTWARE]]`, `[[MUSIC WORKS]]`, `[[VINILOVERSUS]]`, `[[WILD BUFFALO]]`, `[[WRITING]]`, `[[06 PERSONAL]]`
+  - **Invalid** (these are categories, not areas): `[[02 COMMUNITY]]`, `[[03 BUSINESS]]`, `[[05 CREATIVE]]`
+  - To determine the correct AREA, find where the parent program lives in `02 AREAS/` — the area-level folder/MOC is the AREA.
+- **SUB-AREA** is optional. If present, it must be a wikilink. Only use when there's a meaningful subdivision within the AREA.
+- **priority** must be one of: `critical`, `high`, `standard`, `low`. Default to `standard` if not specified.
+
+## Related Skills
+- [[decision-brief]] — when the project has open architectural decisions that need structured analysis before implementation
