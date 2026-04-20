@@ -1,11 +1,18 @@
 ---
 name: project-create
-version: "0.0.1"description: Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Converts inbox notes, ideas, or raw topics into fully scoped briefs.
+version: "0.1.0"
+description: Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
 ---
 
-Create a Project Brief or Program Brief through a structured interactive process — research the input, run a guided Q&A to scope the initiative, decide project vs. program, apply the correct template, link to relevant vault notes and external references, and deliver to INBOX for review.
+Create a Project Brief or Program Brief through a structured interactive process — research the input, run a guided Q&A to scope the initiative, decide project vs. program, apply the correct template, link to relevant vault notes and external references, and deliver for review.
+
+**Projects follow a two-phase commit:**
+- **Phase 1 — Scoping**: research + Q&A + draft brief saved to INBOX. The Continuation Prompt contains the Phase 2 activation text so the flow is resumable across sessions.
+- **Phase 2 — Review & Commit**: present the draft, let the user edit or brainstorm further, then on confirmation create a dedicated folder under `01 PROJECTS/<Brief Name>/`, move the brief into it, and set the final status (active or incubating).
+
+**Programs keep a single-phase flow** — draft, save to their area folder, cross-link.
 
 ## Philosophy
 
@@ -18,9 +25,11 @@ Pipeline: `Input -> Research -> Q&A -> Classify -> Template -> Link -> Deliver -
 ## Vault Exception
 
 This skill may:
-- Create new files in `00 HUB/00 INBOX/` — the project/program brief and any companion files
+- Create new files in `00 HUB/00 INBOX/` — the draft project/program brief and any companion files
+- **For Projects only**, during Phase 2 finalization: create a new folder under `01 PROJECTS/<Brief Name>/` and move the confirmed brief from INBOX into that folder
 - Read files anywhere in the vault for research and linking
-- **Modify existing vault files only for cross-linking** — inserting wikilinks to the new brief into related notes (Step 6). All proposed edits must be listed and confirmed by the user before execution. No other modifications to existing files are permitted.
+- **Modify existing vault files only for cross-linking** — inserting wikilinks to the new brief into related notes (Step 7). All proposed edits must be listed and confirmed by the user before execution. No other modifications to existing files are permitted.
+- **Edit the draft brief in place during Phase 2** — iterative revisions before the user confirms the final version are allowed on the draft file itself.
 
 ## Inputs
 
@@ -56,9 +65,12 @@ Use WebSearch to find:
 **1d — Present research findings**
 Share a concise summary of what was found — vault connections, relevant context, and external insights. This grounds the Q&A in real context.
 
-### Step 2: Interactive Q&A — Scoping
+### Step 2: Phase 1 — Scoping Q&A
 
-Run an adaptive Q&A to fill in all sections of the project brief. Use AskUserQuestion with well-informed options based on Step 1 research.
+> **Projects:** this is the first of two phases. Phase 1 scopes the brief; Phase 2 (Step 6) reviews and commits it.
+> **Programs:** single phase — the answers collected here flow directly into Steps 4 and 5.
+
+Run an adaptive Q&A to fill in all sections of the brief. Use AskUserQuestion with well-informed options based on Step 1 research.
 
 **Core questions to cover** — adapt phrasing and options based on the specific topic:
 
@@ -96,9 +108,9 @@ Based on the scoping answers, recommend whether this should be a **Project** or 
 
 Present the recommendation with reasoning. Let the user decide.
 
-### Step 4: Build the Brief
+### Step 4: Build the Draft Brief
 
-Apply the correct template based on the decision:
+Apply the correct template based on the decision. For **Projects**, the Continuation Prompt section is populated with the Phase 2 activation text (see 4a below) instead of the standard empty handoff template.
 
 **For Projects** — use the Project Brief Template structure:
 ```
@@ -145,7 +157,41 @@ H2 Log
 - Key Resources subsections are: **Evergreen Notes** (distilled insights), **Reference Materials** (source docs, links), **People / Collaborators**. Never use "Atomic Notes" — the vault term is Evergreen Notes.
 - **Table wikilink convention:** Embed `[[wikilinks]]` directly in the name/title column of tables — never use a separate "Link" column. Applies to Sub-Project Index, Milestones, AI Ecosystem tables, and any other table with named entities.
 
-### Step 5: Link and Deliver
+**4a — Phase 2 Activation block (Projects only)**
+
+For projects, populate the `## Continuation Prompt` section with this activation text (substitute `<Brief Name>` with the actual filename stem). Do **not** use the standard empty handoff template — that is only restored after Phase 2 finalizes in Step 6.
+
+```markdown
+## Continuation Prompt
+
+> **Status: DRAFT — Phase 2 pending**
+> **Created by:** `/project-create`
+> **Phase 1 complete:** research, scoping Q&A, and draft brief written.
+>
+> **To activate Phase 2, paste the following to Claude Code:**
+>
+> ```
+> Resume /project-create Phase 2 for [[<Brief Name>]].
+>
+> 1. Read the current draft brief.
+> 2. Present a concise summary of each H2 section and ask me:
+>    "Is there anything else about this project brief you'd like to edit or brainstorm before committing?"
+> 3. If I want to iterate — help me revise sections in place (surgical edits on the draft file).
+>    Loop the question until I explicitly confirm the final version.
+> 4. When I confirm:
+>    a. Ask me for the final status via AskUserQuestion — choices: `active` | `incubating`.
+>    b. Create the folder `01 PROJECTS/<Brief Name>/` (exact filename stem, no extension).
+>    c. Move the brief from `00 HUB/00 INBOX/` into that folder.
+>    d. Update the `status:` frontmatter field to my choice.
+>    e. Replace this Continuation Prompt block with the standard empty handoff template.
+>    f. Run the Cross-Link Scan (Step 7 of the `/project-create` skill).
+> 5. Report final location, status, and cross-links applied.
+> ```
+```
+
+While in DRAFT state, set `status: incubating` in frontmatter as a safe default — it will be overwritten in Step 6.
+
+### Step 5: Deliver Draft
 
 **5a — Insert vault links**
 For every vault note identified as relevant in Step 1, insert proper `[[wikilinks]]` in the appropriate section — Key Resources for reference materials, Working Notes for context, Dependencies for blockers.
@@ -153,33 +199,89 @@ For every vault note identified as relevant in Step 1, insert proper `[[wikilink
 **5b — Insert external references**
 For any external resources found in web research, add as markdown links in Key Resources or Working Notes.
 
-**5c — Determine destination and status**
+**5c — Save the draft**
 
-For **Projects**, ask the user for the `status:` value (this goes in frontmatter):
-- `active` — time is scheduled for this project in the coming week (counts toward 7-project WIP cap) → destination: `01 PROJECTS/`
-- `delegated` — someone else leads, Alberto only tracks progress (separate track, no hard cap) → destination: `01 PROJECTS/`
-- `incubating` — committed project, not currently being worked on → destination: `01 PROJECTS/`
-- `blocked` — waiting on a specific person or dependency to unblock → destination: `01 PROJECTS/`
-- `someday-maybe` — not committed, a possibility → destination: `01 PROJECTS/04 Someday-Maybe/`
+- **Projects:** save to `00 HUB/00 INBOX/<Brief Name>.md` with `status: incubating` and the Phase 2 activation Continuation Prompt from Step 4a. Do **not** create the `01 PROJECTS/<Brief Name>/` folder yet — that happens in Step 6 after the user confirms the final version.
+- **Programs:** save to `00 HUB/00 INBOX/<Brief Name>.md` for review (single-phase flow). The user will move it to `02 AREAS/AREA_FOLDER/` after approving.
 
-For **Programs**: destination is `02 AREAS/AREA_FOLDER/` under the relevant area (unchanged).
-
-**5d — Save to INBOX**
-Save the completed brief to `00 HUB/00 INBOX/` with the note title as filename.
-
-**5e — Present summary**
+**5d — Present summary**
 Tell the user:
-- Where the brief was saved
+- Where the draft was saved
 - What vault notes were linked
-- The recommended destination folder and status
+- For projects: that the brief is in DRAFT state and Phase 2 (review & commit) is next — you will proceed immediately to Step 6 in the current session, but if the session ends, the Continuation Prompt can resume Phase 2 in a new session.
+- For programs: the recommended destination folder under `02 AREAS/` — remind the user to move the file there after review.
 - Any open questions or items flagged for their attention
-- Remind them to review and move the brief to the approved destination folder
 
-### Step 6: Cross-Link Scan
+### Step 6: Phase 2 — Review & Commit (Projects only)
 
-**This step is mandatory.** After the brief is saved, run a comprehensive cross-link scan to strengthen the knowledge graph bidirectionally.
+> **Programs skip this step** and proceed directly to Step 7 (Cross-Link Scan). The user moves a program brief manually to its area folder.
 
-**6a — Comprehensive vault scan**
+This is the commit phase. The draft brief is already on disk in `00 HUB/00 INBOX/`. Now walk the user through final review, iterate as needed, then physically commit the project by creating its folder, moving the brief into it, and setting the final status.
+
+**6a — Present the draft for review**
+
+Summarize the draft concisely:
+- Title and one-line outcome
+- Area / sub-area / parent program
+- Planned milestones (count + first target)
+- Key dependencies and waiting-for items
+- Notable gaps or sections flagged during Step 1-5 as "needs user input"
+
+Then ask explicitly:
+
+> **"Is there anything else about this project brief you'd like to edit or brainstorm before committing?"**
+
+**6b — Iterate until confirmed**
+
+If the user wants changes:
+- Make surgical edits to the draft file in place (section-level, not full rewrites)
+- For bigger brainstorms (e.g., scope expansion, new milestones, risk reassessment), run mini-Q&A via AskUserQuestion and then apply the results
+- After each edit cycle, re-summarize what changed and repeat the question in 6a
+
+Loop until the user gives an explicit confirmation — wording like "commit it", "that's final", "good to go", "ship it", or equivalent. **Do not assume confirmation from silence or an ambiguous response** — ask again.
+
+**6c — Ask for final status**
+
+Use AskUserQuestion with exactly two choices:
+- `active` — starting work now; counts toward the 7-project WIP cap
+- `incubating` — committed to the project, but not starting work this week
+
+Do not offer `delegated`, `blocked`, or `someday-maybe` here — those are edge cases that should be set manually later if relevant.
+
+**6d — Create folder and move the brief**
+
+Execute in order:
+1. Create the folder `01 PROJECTS/<Brief Name>/` (use the exact filename stem, no `.md` extension).
+2. Move the brief file from `00 HUB/00 INBOX/<Brief Name>.md` to `01 PROJECTS/<Brief Name>/<Brief Name>.md` (prefer `mv` via Bash to preserve timestamps).
+3. Update the `status:` frontmatter field in the moved file to the user's choice (`active` or `incubating`).
+4. Replace the Phase 2 activation Continuation Prompt block with the standard empty handoff template:
+   ```markdown
+   ## Continuation Prompt
+
+   > **Date:**
+   > **Mode:**
+   > **Context:**
+   >
+   > **Resume from:**
+   > **Key decisions this session:**
+   > **Blockers/open questions:**
+   > **Files touched:**
+   ```
+5. Add a Log entry for commit: `| <today> | Milestone | Project created and committed via /project-create (status: <active|incubating>) |`
+
+**6e — Confirm commit**
+
+Report to the user:
+- Final path: `01 PROJECTS/<Brief Name>/<Brief Name>.md`
+- Final status
+- Folder created: yes
+- Ready to run Step 7 (Cross-Link Scan)
+
+### Step 7: Cross-Link Scan
+
+**This step is mandatory.** After the brief is committed (projects) or saved to INBOX (programs), run a comprehensive cross-link scan to strengthen the knowledge graph bidirectionally.
+
+**7a — Comprehensive vault scan**
 Search across all active vault areas for notes related to the new brief's topic, area, and keywords:
 - `01 PROJECTS/` — sibling projects, sub-projects of the same parent program, projects with overlapping dependencies or feeds
 - `02 AREAS/` — Area MOCs, parent program brief, sibling programs, related programs in adjacent areas
@@ -190,7 +292,7 @@ For each candidate note, check both:
 - **Frontmatter relationships** — `depends_on`, `feeds`, `learns_from`, `parent` fields that should reference the new brief
 - **Body content** — sections like Key Resources, Working Notes, Sub-Project Index, or Related Notes where a wikilink to the new brief would add value
 
-**6b — Build cross-link manifest**
+**7b — Build cross-link manifest**
 Compile a list of proposed edits, organized by note. For each proposed edit, specify:
 - The **target file** path and name
 - The **section** where the link should be inserted
@@ -199,13 +301,13 @@ Compile a list of proposed edits, organized by note. For each proposed edit, spe
 
 Also identify any **frontmatter relationship updates** needed on the new brief itself (e.g., if the scan reveals a `depends_on` or `feeds` relationship that wasn't captured during Steps 1-5).
 
-**6c — Present manifest for user approval**
+**7c — Present manifest for user approval**
 Display the full cross-link manifest to the user. Group edits by target file. Include a count of total proposed edits and affected files. The user may:
 - Approve all
 - Approve selectively (remove specific edits)
 - Skip the cross-linking entirely
 
-**6d — Execute approved edits**
+**7d — Execute approved edits**
 For each approved edit:
 - Read the target file
 - Insert the wikilink in the specified section, matching existing formatting
@@ -213,9 +315,9 @@ For each approved edit:
 - For body sections, add the wikilink in the most natural position (e.g., as a new list item, table row, or inline reference)
 - Preserve all existing content — surgical insertion only
 
-If the scan also identified updates needed on the new brief itself, apply those as well (updating the file saved in Step 5d).
+If the scan also identified updates needed on the new brief itself, apply those as well (updating the brief at its current location — `01 PROJECTS/<Brief Name>/<Brief Name>.md` for committed projects, or `00 HUB/00 INBOX/<Brief Name>.md` for programs awaiting manual placement).
 
-**6e — Report results**
+**7e — Report results**
 Summarize what was linked:
 - Number of files updated
 - Total wikilinks inserted
@@ -228,13 +330,14 @@ Summarize what was linked:
 - Use AskUserQuestion for structured choices — batch up to 4 questions per call
 - Only include vault notes that are clearly relevant — when in doubt, leave it out
 - Use exact note names without .md extension inside wikilinks
-- Do not modify existing vault files except during Step 6 (Cross-Link Scan), where approved wikilink insertions are permitted
+- Do not modify existing vault files except during Step 6 (Phase 2 commit — moving the draft from INBOX to `01 PROJECTS/<Brief Name>/`) and Step 7 (Cross-Link Scan — approved wikilink insertions). Draft-brief edits during Phase 2 iteration target only the draft file itself.
 - Avoid empty placeholder wikilinks — omit sections with no content rather than leaving blanks
 - Web research is optional — skip it for purely internal/organizational projects where external knowledge adds nothing
 - If the input note already contains substantial content, pre-fill Q&A answers from it and confirm with the user rather than re-asking
 - The vault working directory is resolved at runtime from the CLAUDE.md chain
-- Projects go to `01 PROJECTS/` (flat) or `01 PROJECTS/04 Someday-Maybe/` for someday-maybe status. Status is tracked via the `status:` frontmatter field, not folder location.
-- Programs go to `02 AREAS/` under the relevant area folder
+- **Projects created by this skill go into their own dedicated folder:** `01 PROJECTS/<Brief Name>/<Brief Name>.md`. The folder is created in Step 6 after the user confirms the final version in Phase 2. Status is tracked via the `status:` frontmatter field.
+- Phase 2 restricts status choice to `active` or `incubating`. Other values (`delegated`, `blocked`, `someday-maybe`) can be set manually later if the project's state changes.
+- Programs go to `02 AREAS/` under the relevant area folder — saved to INBOX, then moved manually by the user (no two-phase flow, no folder creation).
 - Project Briefs always include: Outcome, Why This Matters, Continuation Prompt, Next Actions, Waiting For, Dependencies, Key Resources, Working Notes, Plan with Milestones, Log
 - Program Briefs always include: Outcome, Why This Matters, Sub-Project Index, Continuation Prompt, Next Actions, Waiting For, Key Resources, Working Notes, Plan with Milestones, Log
 - Never place Learning Programs or area-level concerns as projects — those have their own skill or template

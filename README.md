@@ -1,8 +1,8 @@
 # project-create
 
-> Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Converts inbox notes, ideas, or raw topics into fully scoped briefs.
+> Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 
-**Version:** 0.0.1
+**Version:** 0.1.0
 
 ## Installation
 
