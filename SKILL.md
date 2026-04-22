@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.1.0"
+version: "0.2.0"
 description: Create a Project or Program brief through research, interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -85,6 +85,7 @@ Run an adaptive Q&A to fill in all sections of the brief. Use AskUserQuestion wi
 9. **Prior work** — Has anything been done before? What exists already?
 10. **Risks** — What could derail this? What are the top 2-3 risks?
 11. **Success metrics** — How will you measure success? What KPIs matter?
+12. **AI-specific instructions** *(optional — skip if none)* — Are there project-unique AI rules not already covered by the area CLAUDE.md? Examples: terminology/glossary, specific tools or MCPs to always use, process conventions (e.g., "always run `/deep-research` before proposing"). If yes, capture them; they will land under `### AI Context` inside Working Notes. If "no" or "covered at area level", skip — do not create an empty section.
 
 Not all questions apply to every project. Skip questions that are irrelevant or already answered by the input note. Add topic-specific questions based on the research phase findings.
 
@@ -150,7 +151,7 @@ H2 Log
 - Outcome must be one sentence for projects, one paragraph for programs — concrete and measurable
 - Why This Matters must connect to real stakes — strategic plans, OKRs, business impact
 - Next Actions must be concrete and actionable — no vague "research X" without specifying what to research and where
-- Working Notes should contain the research findings, frameworks, and context gathered during the process — this is the institutional memory
+- Working Notes contain research findings, frameworks, and context gathered during the process — the institutional memory. When a project has AI-specific instructions that aren't already covered by area-level CLAUDE.md (project-unique terminology, tool preferences, process conventions), add them under an `### AI Context` H3 subsection. Do not duplicate area-level rules here — those auto-load via the CLAUDE.md chain.
 - Key Resources must include actual vault wikilinks found during research, not empty placeholders
 - Milestones should be 3-7, each with a target date or timeframe
 - Tags should include the area, topic keywords, and any relevant programs
@@ -336,6 +337,7 @@ Summarize what was linked:
 - If the input note already contains substantial content, pre-fill Q&A answers from it and confirm with the user rather than re-asking
 - The vault working directory is resolved at runtime from the CLAUDE.md chain
 - **Projects created by this skill go into their own dedicated folder:** `01 PROJECTS/<Brief Name>/<Brief Name>.md`. The folder is created in Step 6 after the user confirms the final version in Phase 2. Status is tracked via the `status:` frontmatter field.
+- **Sibling skill coordination:** When modifying this skill's output convention (folder structure, filename pattern, frontmatter fields, required/optional sections, Continuation Prompt format), update sibling auditor skills in the same change. **Current downstream auditors that must be kept in sync:** `/clean-projects` (audits `01 PROJECTS/` layout and template compliance). Before finalizing edits here, grep the auditor's SKILL.md for the changed convention and confirm it handles both old and new behavior during any transition. Evidence: 2026-04-22 session — folder-wrapped convention landed in `/project-create` weeks before `/clean-projects` was updated; user had to spot the drift manually.
 - Phase 2 restricts status choice to `active` or `incubating`. Other values (`delegated`, `blocked`, `someday-maybe`) can be set manually later if the project's state changes.
 - Programs go to `02 AREAS/` under the relevant area folder — saved to INBOX, then moved manually by the user (no two-phase flow, no folder creation).
 - Project Briefs always include: Outcome, Why This Matters, Continuation Prompt, Next Actions, Waiting For, Dependencies, Key Resources, Working Notes, Plan with Milestones, Log
