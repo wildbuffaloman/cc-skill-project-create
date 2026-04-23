@@ -353,5 +353,35 @@ Summarize what was linked:
 - **SUB-AREA** is optional. If present, it must be a wikilink. Only use when there's a meaningful subdivision within the AREA.
 - **priority** must be one of: `critical`, `high`, `standard`, `low`. Default to `standard` if not specified.
 
+## Dependencies
+
+### Required
+
+- Nothing beyond Claude Code's built-in tools (Read, Write, Edit, Glob, Grep, Bash for `mv`, WebSearch, WebFetch, AskUserQuestion). This skill does research, runs Q&A, writes briefs, and updates cross-links — all via built-ins.
+
+### Optional
+
+- **WebSearch / WebFetch** — used in Step 1c for external research on industry/domain topics. Fallback if the user declines web research (purely internal projects): skip Step 1c and proceed with vault-only context. Both are Claude Code built-ins; no external API keys required.
+
+### Vault Conventions
+
+- Applies [[Inbox Routing]] — drafts land in `00 HUB/00 INBOX/` before the Phase 2 commit moves Projects to `01 PROJECTS/<Brief Name>/`.
+- Applies [[Brief Template Compliance]] — Projects and Programs must include required sections (Outcome, Why This Matters, Next Actions, Waiting For, Log, etc.).
+- Applies [[Linking Conventions]] (Hard-Coded Reference Rule) — all note references in the brief and all cross-link edits use `[[wikilinks]]`.
+- Applies [[Graph-Ready Conventions]] — frontmatter relationships (`depends_on`, `feeds`, `learns_from`, `parent`, `owner`) are wikilink arrays, never inline Dataview.
+- Applies [[Dual-Hierarchy Model]] — Step 3 project-vs-program classification uses the >12-month duration test.
+- Assumes PARA structure for vault search in Steps 1b and 7a (`01 PROJECTS/`, `02 AREAS/`, `03 REFERENCE/`, `00 HUB/`).
+- Sibling-skill rule: updates to the output convention (folder layout, frontmatter fields, Continuation Prompt format) must be mirrored in the `/clean-projects` auditor — see Rules section.
+
+### Does NOT Require
+
+- No MCPs (no Granola, Slack, Google Workspace, SQL Server, etc.).
+- No CLIs (no gws, gh, accli).
+- No desktop apps.
+- No external services or API keys.
+- No Python or Node packages.
+- No plugins.
+
 ## Related Skills
 - [[decision-brief]] — when the project has open architectural decisions that need structured analysis before implementation
+- [[clean-projects]] — downstream auditor that must stay in sync with this skill's output convention (see Rules)
