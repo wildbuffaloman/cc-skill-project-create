@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.3.0"
+version: "0.3.1"
 description: Create a Project or Program brief through research, an overlap-check routing gate (may route the work into an existing brief instead of creating a new one), interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -409,7 +409,7 @@ If the new project's `parent:` frontmatter points to a program brief (i.e., a fi
   <!-- SUB-PROJECT-INDEX END -->
   ```
 
-  Show the user the proposed insertion point and the parent brief's current section order. Apply only on approval. Without these markers, `sync_vault_indexes.sh` cannot auto-list child projects in the parent — the index drifts silently and downstream consumers (`00 HUB/Program Hierarchy.md`, manual readers of the parent brief) miss the new sub-project.
+  Show the user the proposed insertion point and the parent brief's current section order. Apply only on approval. Without these markers, `sync_vault_indexes.sh` cannot auto-list child projects in the parent — the index drifts silently and downstream consumers (`00 HUB/00. PROGRAM DASHBOARD.md`, manual readers of the parent brief) miss the new sub-project.
 
   Skip this proposal if the parent program brief does not exist (orphan parent — already an error condition surfaced by Step 7 cross-link scan), or if the brief intentionally maintains its own hand-curated sub-project table (rare; check for an existing manually-formatted "Sub-Projects" section before proposing markers — markers and hand-curation conflict).
 
@@ -582,7 +582,7 @@ Update the merged brief's frontmatter:
 Find all active vault references to `[[<non-target>]]` excluding `04 ARCHIVES/`, daily notes, lessons.md, reports, Log entries (preserve historical truth). Replace with `[[<target>]]`. Strategy:
 - Use `replace_all=true` on files with ALL-active references (no historical Log entries to preserve).
 - Use surgical edits on files with mixed active + historical references.
-- In the relevant SUB-PROJECT-INDEX tables (parent program, Program Hierarchy, Area MOC), mark the merged row with strikethrough notation: `~~[[<non-target>]]~~ → [[<target>]] (merged YYYY-MM-DD)`.
+- In the relevant SUB-PROJECT-INDEX tables (parent program, [[00. PROGRAM DASHBOARD]], Area MOC), mark the merged row with strikethrough notation: `~~[[<non-target>]]~~ → [[<target>]] (merged YYYY-MM-DD)`.
 - Append a Log entry on the merged brief AND the parent program brief documenting the merge.
 
 ### Rules for Merge Mode
