@@ -596,7 +596,7 @@ Find all active vault references to `[[<non-target>]]` excluding `04 ARCHIVES/`,
 ### Evidence (2026-05-12)
 
 This pattern was applied twice in one session:
-1. **[[Bufalinda Vault]] → [[Repositorio Central del Estado de Bufalinda]]** — sibling sub-project absorbed; design fear ("unmaintainable central repository") shared between both; merge eliminated "two systems both claiming single source of truth" failure mode. Hook blocked post-move stamp; intent captured upstream in merge target's Working Notes "MERGE:" section.
+1. **[[Bufalinda Vault]] → [[Bufalinda Company OS]]** — sibling sub-project absorbed; design fear ("unmaintainable central repository") shared between both; merge eliminated "two systems both claiming single source of truth" failure mode. Hook blocked post-move stamp; intent captured upstream in merge target's Working Notes "MERGE:" section.
 2. **[[Bufalinda AI Brain V0 Implementation]] (umbrella) → [[Bufalinda AI Brain V0]] (runtime)** — duplicate umbrella + runtime briefs; restored Manuel as `co_owner:`; absorbed runtime brief's U1-U6 phases + 12-row decisions table reference + project-specific AI Context into merged brief's Working Notes "Runtime Track" subsection; nested 4 newly-spawned sub-projects into merged folder.
 
 Both merges followed the 6-step pattern exactly. The 2026-05-12 session also produced a Scan Brief at `00 HUB/00 INBOX/2026-05-12 - Bufalinda AI Consolidation Scan Brief.md` that codifies a Phase 3 spec mirroring this Merge Mode for the next focused consolidation session.
