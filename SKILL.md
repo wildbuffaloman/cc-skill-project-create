@@ -312,6 +312,8 @@ For any external resources found in web research, add as markdown links in Key R
 - **Projects:** save to `00 HUB/00 INBOX/<Brief Name>.md` with `status: incubating` and the Phase 2 activation Continuation Prompt from Step 4a. Do **not** create the `01 PROJECTS/<Brief Name>/` folder yet — that happens in Step 6 after the user confirms the final version.
 - **Programs:** save to `00 HUB/00 INBOX/<Brief Name>.md` for review (single-phase flow). The user will move it to `02 AREAS/AREA_FOLDER/` after approving.
 
+**Frontmatter:** the new file's YAML must comply with [[Frontmatter Schema]] — emit every Required field for `category: project` / `category: program` per the Per-Category Required-Field Matrix, use canonical key names only, wikilink-typed fields as resolving `"[[wikilinks]]"`, unquoted ISO dates, and omit empty optional keys.
+
 **5d — Present summary**
 Tell the user:
 - Where the draft was saved
