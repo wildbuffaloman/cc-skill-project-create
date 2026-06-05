@@ -123,11 +123,13 @@ Then use AskUserQuestion with four route choices:
 
 **1.5c — Sub-project path** (route = `sub-project`)
 
-- **If [[X]] is a program** (`category: program`): lock `parent: "[[X]]"` for Step 4 frontmatter. Surface the **SUB-PROJECT-INDEX markers check** (the same check Step 6d.5 runs) right now so the user knows a marker-insertion proposal may come at commit time. Continue to Step 2 with Q&A framed as *"scoping a sub-project of [[X]]"* — skip the parent-program question in Q&A.
+> Whatever the parent, the new brief's `category` is **derived from [[X]]'s category**, not chosen — see Step 3 / [[Frontmatter Schema]] §Category Derivation from Parent.
 
-- **If [[X]] is a project** (`category: project`): sub-projects-of-projects is unusual. Ask: *"Is this really a sub-project, or is it a slice/NA of [[X]]?"*
+- **If [[X]] is a program** (`category: program`) **or a sub-program** (`category: sub-program`): lock `parent: "[[X]]"` and derive `category: project` for Step 4 frontmatter. Surface the **SUB-PROJECT-INDEX markers check** (the same check Step 6d.5 runs) right now so the user knows a marker-insertion proposal may come at commit time. Continue to Step 2 with Q&A framed as *"scoping a sub-project of [[X]]"* — skip the parent-program question in Q&A.
+
+- **If [[X]] is a project** (`category: project`): a true sub-project here derives `category: sub-project` with `parent: "[[X]]"` (co-located in the same folder per [[Dual-Hierarchy Model]]; a `sub-project` can never itself be a parent). But sub-projects-of-projects is unusual — ask first: *"Is this really a sub-project, or is it a slice/NA of [[X]]?"*
   - Slice/NA → re-route to **1.5d** (fold-in).
-  - Genuinely a sub-project → first surface that [[X]] should probably be promoted to a program (separate decision — out of scope for `/project-create`). Capture the promotion question as a Working Notes entry on the new brief, continue as standalone, and link [[X]] as `depends_on`.
+  - Genuinely a sub-project → derive `category: sub-project`, lock `parent: "[[X]]"`, and proceed. (If [[X]] should instead become a program so this can be a full `project`, surface that promotion as a separate decision — out of scope for `/project-create` — capture it as a Working Notes entry and continue.)
 
 **1.5d — Fold-in path** (route = `fold into [[X]]`)
 
@@ -215,13 +217,26 @@ Based on the scoping answers, recommend whether this should be a **Project** or 
 
 Present the recommendation with reasoning. Let the user decide.
 
+**Category is DERIVED from the chosen parent — never picked freely.** Once the family (project-family in `01 PROJECTS/` vs. program-family in `02 AREAS/`) and the `parent:` from Step 1.5 are known, the brief's `category` follows this table mechanically (per [[Frontmatter Schema]] §Category Derivation from Parent):
+
+| Brief family | Parent resolves to | Derived `category` |
+|---|---|---|
+| project-family (`01 PROJECTS/`) | a `project` or `sub-project` | `sub-project` |
+| project-family (`01 PROJECTS/`) | a `program` or `sub-program` | `project` |
+| program-family (`02 AREAS/`) | a `program` or `sub-program` | `sub-program` |
+| program-family (`02 AREAS/`) | **no parent** | `program` |
+
+A `sub-project` can **never** be a parent (max depth: program → project → sub-project). If Step 1.5 routed to `sub-project of [[X]]`, set `category: sub-project` when [[X]] is a `project`/`sub-project`, or `category: project` when [[X]] is a `program`/`sub-program`. A top-level program is the only brief with no parent.
+
 ### Step 4: Build the Draft Brief
 
 Apply the correct template based on the decision. For **Projects**, the Continuation Prompt section is populated with the Phase 2 activation text (see 4a below) instead of the standard empty handoff template.
 
-**For Projects** — use the Project Brief Template structure:
+> **`category` and `status` are constrained, not free-form.** `category` is **derived from the parent** per the Step 3 table / [[Frontmatter Schema]] §Category Derivation from Parent (project-family: `project` when the parent is a program/sub-program, `sub-project` when the parent is a project/sub-project; program-family: `program` when parentless, `sub-program` when nested under a program/sub-program). `status` must be one of the 6-value enum `active · delegated · incubating · blocked · someday-maybe · closed` ([[Frontmatter Schema]] §Status Enum) — never `completed`, `draft`, `paused`, or any legacy drift value.
+
+**For Projects** — use the Project Brief Template structure (`category: project` for a top-level project under a program; `category: sub-project` when the parent is itself a project — see Step 3 derivation):
 ```
-Frontmatter: description, AREA, SUB-AREA, category: project, status (active|delegated|incubating|blocked|someday-maybe), tags, owner: "[[Name]]", parent: "[[Program]]" (required — must point to a program), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
+Frontmatter: description, AREA, SUB-AREA, category: project|sub-project (DERIVED from parent — see Step 3), status (active|delegated|incubating|blocked|someday-maybe|closed), tags, owner: "[[Name]]", parent: "[[Parent]]" (required — a program/sub-program for category: project; a project for category: sub-project; a sub-project can never be a parent), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
 H2 Outcome — one sentence blockquote
 H2 Why This Matters — success stakes, failure stakes
 H2 Continuation Prompt — empty template for session handoffs
@@ -235,9 +250,9 @@ H2 Plan with Milestones table — 3-7 milestones with targets
 H2 Log — creation entry
 ```
 
-**For Programs** — use the Program Template structure:
+**For Programs** — use the Program Template structure (`category: program` for a top-level, parentless program; `category: sub-program` when nested under a program/sub-program — DERIVED per Step 3):
 ```
-Frontmatter: description, AREA, SUB-AREA, category: program, status, review_cadence, tags, owner: "[[Name]]", parent: "[[Parent Program]]" (optional — only for sub-programs), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
+Frontmatter: description, AREA, SUB-AREA, category: program|sub-program (DERIVED — sub-program iff a parent program/sub-program exists; program iff parentless), status (active|delegated|incubating|blocked|someday-maybe|closed), review_cadence, tags, owner: "[[Name]]", parent: "[[Parent Program]]" (required for category: sub-program — points to a program/sub-program; omit for a top-level program), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
 H1 Title
 H2 Outcome — one paragraph blockquote
 H2 Why This Matters — success stakes, failure stakes
@@ -312,7 +327,7 @@ For any external resources found in web research, add as markdown links in Key R
 - **Projects:** save to `00 HUB/00 INBOX/<Brief Name>.md` with `status: incubating` and the Phase 2 activation Continuation Prompt from Step 4a. Do **not** create the `01 PROJECTS/<Brief Name>/` folder yet — that happens in Step 6 after the user confirms the final version.
 - **Programs:** save to `00 HUB/00 INBOX/<Brief Name>.md` for review (single-phase flow). The user will move it to `02 AREAS/AREA_FOLDER/` after approving.
 
-**Frontmatter:** the new file's YAML must comply with [[Frontmatter Schema]] — emit every Required field for `category: project` / `category: program` per the Per-Category Required-Field Matrix, use canonical key names only, wikilink-typed fields as resolving `"[[wikilinks]]"`, unquoted ISO dates, and omit empty optional keys.
+**Frontmatter:** the new file's YAML must comply with [[Frontmatter Schema]] — emit every Required field for the derived `category` (`project` / `sub-project` / `program` / `sub-program`) per the Per-Category Required-Field Matrix, use canonical key names only, wikilink-typed fields as resolving `"[[wikilinks]]"`, unquoted ISO dates, and omit empty optional keys. The `category` MUST be the value **derived from the parent** (§Category Derivation from Parent — see Step 3 table), and `status` MUST be one of the 6-value enum (§Status Enum: `active · delegated · incubating · blocked · someday-maybe · closed`) — never a free choice or a legacy drift value.
 
 **5d — Present summary**
 Tell the user:
@@ -499,8 +514,8 @@ Summarize what was linked:
 - Waiting For: only items from other people or agents. Self-tasks go in Next Actions.
 - All typed relationships go in YAML frontmatter as wikilinks per vault root CLAUDE.md Graph-Ready Conventions. Use `owner: "[[Name]]"`, `parent: "[[Program]]"`, and arrays for `depends_on`, `feeds`, `learns_from`. No inline Dataview fields in the body. Dependencies and AI Ecosystem sections contain human-readable context only (lists, tables, descriptions).
 - **AREA is required** and must be a wikilink to a known area. The vault has area categories (folder groupings) and areas (the actual entities). Never put a category in the AREA field.
-  - Valid AREA values: `[[01 HEALTH]]`, `[[01 THE DUHAUS]]`, `[[The Unschool]]`, `[[ADM - AED Mastermind]]`, `[[BUFFALO 4]]`, `[[DUVOG]]`, `[[FORO YPO]]`, `[[MENTORING]]`, `[[BUFALINDA]]`, `[[DAG]]`, `[[SATORI LLC]]`, `[[00 INVESTING]]`, `[[04 AI & SOFTWARE]]`, `[[MUSIC WORKS]]`, `[[VINILOVERSUS]]`, `[[WILD BUFFALO]]`, `[[WRITING]]`, `[[06 PERSONAL]]`
-  - **Invalid** (these are categories, not areas): `[[02 COMMUNITY]]`, `[[03 BUSINESS]]`, `[[05 CREATIVE]]`
+  - Valid AREA values: `[[01 HEALTH]]`, `[[01 THE DUHAUS]]`, `[[The Unschool]]`, `[[ADM - AED Mastermind]]`, `[[BUFFALO 4]]`, `[[DUVOG]]`, `[[FORO YPO]]`, `[[MENTORING]]`, `[[03 BUFALINDA]]`, `[[DAG]]`, `[[SATORI LLC]]`, `[[00 INVESTING]]`, `[[07 AI & SOFTWARE]]`, `[[MUSIC WORKS]]`, `[[04 VINILOVERSUS]]`, `[[WILD BUFFALO]]`, `[[WRITING]]`, `[[05 PERSONAL]]`
+  - **Invalid** (these are categories, not areas): `[[09 COMMUNITY]]`, `[[06 BUSINESS]]`, `[[08 CREATIVE]]`
   - To determine the correct AREA, find where the parent program lives in `02 AREAS/` — the area-level folder/MOC is the AREA.
 - **SUB-AREA** is optional. If present, it must be a wikilink. Only use when there's a meaningful subdivision within the AREA.
 - **priority** must be one of: `critical`, `high`, `standard`, `low`. Default to `standard` if not specified.
@@ -584,7 +599,7 @@ Update the merged brief's frontmatter:
 Find all active vault references to `[[<non-target>]]` excluding `04 ARCHIVES/`, daily notes, lessons.md, reports, Log entries (preserve historical truth). Replace with `[[<target>]]`. Strategy:
 - Use `replace_all=true` on files with ALL-active references (no historical Log entries to preserve).
 - Use surgical edits on files with mixed active + historical references.
-- In the relevant SUB-PROJECT-INDEX tables (parent program, [[00. PROGRAM DASHBOARD]], Area MOC), mark the merged row with strikethrough notation: `~~[[<non-target>]]~~ → [[<target>]] (merged YYYY-MM-DD)`.
+- In the relevant hand-maintained SUB-PROJECT-INDEX tables (parent program brief, Area MOC), mark the merged row with strikethrough notation: `~~[[<non-target>]]~~ → [[<target>]] (merged YYYY-MM-DD)`. **Do NOT edit `00 HUB/00. PROGRAM DASHBOARD.md`** — per [[Dashboard Composition]] it is auto-regenerated from frontmatter by `generate_hierarchy_note.py` on the next `/session-close`; the merged brief's `status:`/`parent:` (and its archival) make the row reflow automatically. Manual dashboard edits would be wiped.
 - Append a Log entry on the merged brief AND the parent program brief documenting the merge.
 
 ### Rules for Merge Mode
