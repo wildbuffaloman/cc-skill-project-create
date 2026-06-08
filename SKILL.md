@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.3.3"
+version: "0.3.4"
 description: Create a Project or Program brief through research, an overlap-check routing gate (may route the work into an existing brief instead of creating a new one), interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -232,11 +232,11 @@ A `sub-project` can **never** be a parent (max depth: program → project → su
 
 Apply the correct template based on the decision. For **Projects**, the Continuation Prompt section is populated with the Phase 2 activation text (see 4a below) instead of the standard empty handoff template.
 
-> **`category` and `status` are constrained, not free-form.** `category` is **derived from the parent** per the Step 3 table / [[Frontmatter Schema]] §Category Derivation from Parent (project-family: `project` when the parent is a program/sub-program, `sub-project` when the parent is a project/sub-project; program-family: `program` when parentless, `sub-program` when nested under a program/sub-program). `status` must be one of the 6-value enum `active · delegated · incubating · blocked · someday-maybe · closed` ([[Frontmatter Schema]] §Status Enum) — never `completed`, `draft`, `paused`, or any legacy drift value.
+> **`category` and `status` are constrained, not free-form.** `category` is **derived from the parent** per the Step 3 table / [[Frontmatter Schema]] §Category Derivation from Parent (project-family: `project` when the parent is a program/sub-program, `sub-project` when the parent is a project/sub-project; program-family: `program` when parentless, `sub-program` when nested under a program/sub-program). `status` must be one of the project/program enum `draft · active · delegated · incubating · blocked · someday-maybe · closed` ([[Frontmatter Schema]] §Status Enums (Per-Category); `draft` = a brief not yet committed/initialized — a pre-`incubating` state) — never `completed`, `paused`, or any legacy drift value.
 
 **For Projects** — use the Project Brief Template structure (`category: project` for a top-level project under a program; `category: sub-project` when the parent is itself a project — see Step 3 derivation):
 ```
-Frontmatter: description, AREA, SUB-AREA, category: project|sub-project (DERIVED from parent — see Step 3), status (active|delegated|incubating|blocked|someday-maybe|closed), tags, owner: "[[Name]]", parent: "[[Parent]]" (required — a program/sub-program for category: project; a project for category: sub-project; a sub-project can never be a parent), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
+Frontmatter: description, AREA, SUB-AREA, category: project|sub-project (DERIVED from parent — see Step 3), status (draft|active|delegated|incubating|blocked|someday-maybe|closed), tags, owner: "[[Name]]", parent: "[[Parent]]" (required — a program/sub-program for category: project; a project for category: sub-project; a sub-project can never be a parent), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
 H2 Outcome — one sentence blockquote
 H2 Why This Matters — success stakes, failure stakes
 H2 Continuation Prompt — empty template for session handoffs
@@ -252,7 +252,7 @@ H2 Log — creation entry
 
 **For Programs** — use the Program Template structure (`category: program` for a top-level, parentless program; `category: sub-program` when nested under a program/sub-program — DERIVED per Step 3):
 ```
-Frontmatter: description, AREA, SUB-AREA, category: program|sub-program (DERIVED — sub-program iff a parent program/sub-program exists; program iff parentless), status (active|delegated|incubating|blocked|someday-maybe|closed), review_cadence, tags, owner: "[[Name]]", parent: "[[Parent Program]]" (required for category: sub-program — points to a program/sub-program; omit for a top-level program), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
+Frontmatter: description, AREA, SUB-AREA, category: program|sub-program (DERIVED — sub-program iff a parent program/sub-program exists; program iff parentless), status (draft|active|delegated|incubating|blocked|someday-maybe|closed), review_cadence, tags, owner: "[[Name]]", parent: "[[Parent Program]]" (required for category: sub-program — points to a program/sub-program; omit for a top-level program), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
 H1 Title
 H2 Outcome — one paragraph blockquote
 H2 Why This Matters — success stakes, failure stakes
@@ -327,7 +327,7 @@ For any external resources found in web research, add as markdown links in Key R
 - **Projects:** save to `00 HUB/00 INBOX/<Brief Name>.md` with `status: incubating` and the Phase 2 activation Continuation Prompt from Step 4a. Do **not** create the `01 PROJECTS/<Brief Name>/` folder yet — that happens in Step 6 after the user confirms the final version.
 - **Programs:** save to `00 HUB/00 INBOX/<Brief Name>.md` for review (single-phase flow). The user will move it to `02 AREAS/AREA_FOLDER/` after approving.
 
-**Frontmatter:** the new file's YAML must comply with [[Frontmatter Schema]] — emit every Required field for the derived `category` (`project` / `sub-project` / `program` / `sub-program`) per the Per-Category Required-Field Matrix, use canonical key names only, wikilink-typed fields as resolving `"[[wikilinks]]"`, unquoted ISO dates, and omit empty optional keys. The `category` MUST be the value **derived from the parent** (§Category Derivation from Parent — see Step 3 table), and `status` MUST be one of the 6-value enum (§Status Enum: `active · delegated · incubating · blocked · someday-maybe · closed`) — never a free choice or a legacy drift value.
+**Frontmatter:** the new file's YAML must comply with [[Frontmatter Schema]] — emit every Required field for the derived `category` (`project` / `sub-project` / `program` / `sub-program`) per the Per-Category Required-Field Matrix, use canonical key names only, wikilink-typed fields as resolving `"[[wikilinks]]"`, unquoted ISO dates, and omit empty optional keys. The `category` MUST be the value **derived from the parent** (§Category Derivation from Parent — see Step 3 table), and `status` MUST be one of the project/program enum (§Status Enums (Per-Category): `draft · active · delegated · incubating · blocked · someday-maybe · closed`; `draft` = not yet committed/initialized) — never a free choice or a legacy drift value.
 
 **5d — Present summary**
 Tell the user:
