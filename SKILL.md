@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.3.4"
+version: "0.3.5"
 description: Create a Project or Program brief through research, an overlap-check routing gate (may route the work into an existing brief instead of creating a new one), interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -514,7 +514,7 @@ Summarize what was linked:
 - Waiting For: only items from other people or agents. Self-tasks go in Next Actions.
 - All typed relationships go in YAML frontmatter as wikilinks per vault root CLAUDE.md Graph-Ready Conventions. Use `owner: "[[Name]]"`, `parent: "[[Program]]"`, and arrays for `depends_on`, `feeds`, `learns_from`. No inline Dataview fields in the body. Dependencies and AI Ecosystem sections contain human-readable context only (lists, tables, descriptions).
 - **AREA is required** and must be a wikilink to a known area. The vault has area categories (folder groupings) and areas (the actual entities). Never put a category in the AREA field.
-  - Valid AREA values: `[[01 HEALTH]]`, `[[01 THE DUHAUS]]`, `[[The Unschool]]`, `[[ADM - AED Mastermind]]`, `[[BUFFALO 4]]`, `[[DUVOG]]`, `[[FORO YPO]]`, `[[MENTORING]]`, `[[03 BUFALINDA]]`, `[[DAG]]`, `[[SATORI LLC]]`, `[[11 INVESTING]]`, `[[07 AI & SOFTWARE]]`, `[[MUSIC WORKS]]`, `[[04 VINILOVERSUS]]`, `[[WILD BUFFALO]]`, `[[WRITING]]`, `[[05 PERSONAL]]`
+  - Valid AREA values: `[[01 HEALTH]]`, `[[02 DUHAUS]]`, `[[The Unschool]]`, `[[ADM - AED Mastermind]]`, `[[BUFFALO 4]]`, `[[DUVOG]]`, `[[FORO YPO]]`, `[[MENTORING]]`, `[[03 BUFALINDA]]`, `[[DAG]]`, `[[SATORI LLC]]`, `[[10 LEARNING]]`, `[[11 INVESTING]]`, `[[07 AI & SOFTWARE]]`, `[[MUSIC WORKS]]`, `[[04 VINILOVERSUS]]`, `[[WILD BUFFALO]]`, `[[WRITING]]`, `[[05 PERSONAL]]`
   - **Invalid** (these are categories, not areas): `[[09 COMMUNITY]]`, `[[06 BUSINESS]]`, `[[08 CREATIVE]]`
   - To determine the correct AREA, find where the parent program lives in `02 AREAS/` — the area-level folder/MOC is the AREA.
 - **SUB-AREA** is optional. If present, it must be a wikilink. Only use when there's a meaningful subdivision within the AREA.
@@ -539,6 +539,7 @@ Summarize what was linked:
 - Applies [[Graph-Ready Conventions]] — frontmatter relationships (`depends_on`, `feeds`, `learns_from`, `parent`, `owner`) are wikilink arrays, never inline Dataview.
 - Applies [[Dual-Hierarchy Model]] — Step 3 project-vs-program classification uses the >12-month duration test.
 - Assumes PARA structure for vault search in Steps 1b and 7a (`01 PROJECTS/`, `02 AREAS/`, `03 REFERENCE/`, `00 HUB/`).
+- Applies [[Deterministic Compliance]] (LLM-Last Default) — when the brief scopes a programming or automation project, default the implementation to deterministic code and reserve LLM calls for genuine judgment; carry this into the plan (deep-planning) and any skills built.
 - Sibling-skill rule: updates to the output convention (folder layout, frontmatter fields, Continuation Prompt format) must be mirrored in the `/clean-projects` auditor — see Rules section.
 
 ### Does NOT Require
