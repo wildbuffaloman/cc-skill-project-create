@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.3.5"
+version: "0.3.6"
 description: Create a Project or Program brief through research, an overlap-check routing gate (may route the work into an existing brief instead of creating a new one), interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -239,8 +239,7 @@ Apply the correct template based on the decision. For **Projects**, the Continua
 Frontmatter: description, AREA, SUB-AREA, category: project|sub-project (DERIVED from parent — see Step 3), status (draft|active|delegated|incubating|blocked|someday-maybe|closed), tags, owner: "[[Name]]", parent: "[[Parent]]" (required — a program/sub-program for category: project; a project for category: sub-project; a sub-project can never be a parent), depends_on (array of wikilinks), feeds (array of wikilinks), learns_from (array of wikilinks)
 H2 Outcome — one sentence blockquote
 H2 Why This Matters — success stakes, failure stakes
-H2 Continuation Prompt — empty template for session handoffs
-H2 Next Actions — concrete next steps from Q&A
+H2 Next Actions — first subsection is `### Continuation Prompt` (empty template for session handoffs; canonical CP location per validate-brief.py + session-closeout-protocol — NOT a standalone `## Continuation Prompt` H2), then the concrete next steps from Q&A
 H2 Waiting For — items from other people
 H2 Dependencies — human-readable list of dependencies with wikilinks and descriptions
 H2 AI Ecosystem — Feeds Into (table), Learns From (table)
@@ -257,8 +256,7 @@ H1 Title
 H2 Outcome — one paragraph blockquote
 H2 Why This Matters — success stakes, failure stakes
 H2 Sub-Project Index — table: #, Sub-Project (wikilink embedded in name), Status, Description
-H2 Continuation Prompt — empty template
-H2 Next Actions
+H2 Next Actions — first subsection is `### Continuation Prompt` (empty template; canonical CP location per validate-brief.py + session-closeout-protocol — NOT a standalone `## Continuation Prompt` H2), then concrete next steps
 H2 Dependencies — human-readable list of dependencies with wikilinks and descriptions
 H2 AI Ecosystem — Feeds Into (table), Learns From (table)
 H2 Waiting For
@@ -282,10 +280,12 @@ H2 Log
 
 **4a — Phase 2 Activation block (Projects only)**
 
-For projects, populate the `## Continuation Prompt` section with this activation text (substitute `<Brief Name>` with the actual filename stem). Do **not** use the standard empty handoff template — that is only restored after Phase 2 finalizes in Step 6.
+For projects, place a `### Continuation Prompt` subsection at the **top of the `## Next Actions` section** — the canonical CP location enforced by `validate-brief.py` (hook) + `session-closeout-protocol.md` + `brief-updater`, never a standalone `## Continuation Prompt` H2 — and populate it with this activation text (substitute `<Brief Name>` with the actual filename stem). The concrete Next Action items follow the block, still under `## Next Actions`. Do **not** use the standard empty handoff template — that is only restored after Phase 2 finalizes in Step 6.
 
 ```markdown
-## Continuation Prompt
+## Next Actions
+
+### Continuation Prompt
 
 > **Status: DRAFT — Phase 2 pending**
 > **Created by:** `/project-create`
@@ -396,9 +396,9 @@ Execute in order:
 1. Create the folder `01 PROJECTS/<Brief Name>/` (use the exact filename stem, no `.md` extension).
 2. Move the brief file from `00 HUB/00 INBOX/<Brief Name>.md` to `01 PROJECTS/<Brief Name>/<Brief Name>.md` (prefer `mv` via Bash to preserve timestamps).
 3. Update the `status:` frontmatter field in the moved file to the user's choice (`active` or `incubating`).
-4. Replace the Phase 2 activation Continuation Prompt block with the standard empty handoff template:
+4. Replace the Phase 2 activation Continuation Prompt block (the `### Continuation Prompt` subsection at the top of `## Next Actions`) with the standard empty handoff template — keep it as `### Continuation Prompt` under `## Next Actions`, never a standalone `## Continuation Prompt` H2 (canonical per `validate-brief.py`):
    ```markdown
-   ## Continuation Prompt
+   ### Continuation Prompt
 
    > **Date:**
    > **Mode:**
