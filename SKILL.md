@@ -1,6 +1,6 @@
 ---
 name: project-create
-version: "0.3.6"
+version: "0.3.7"
 description: Create a Project or Program brief through research, an overlap-check routing gate (may route the work into an existing brief instead of creating a new one), interactive Q&A, template application, vault linking, and INBOX delivery for review. Projects use a two-phase flow — Phase 1 (Scoping) drafts the brief, Phase 2 (Review & Commit) iterates, then creates a dedicated folder and assigns final status.
 user-invocable: true
 argument-hint: "note path, note title in INBOX, or topic description"
@@ -601,6 +601,7 @@ Find all active vault references to `[[<non-target>]]` excluding `04 ARCHIVES/`,
 - Use `replace_all=true` on files with ALL-active references (no historical Log entries to preserve).
 - Use surgical edits on files with mixed active + historical references.
 - In the relevant hand-maintained SUB-PROJECT-INDEX tables (parent program brief, Area MOC), mark the merged row with strikethrough notation: `~~[[<non-target>]]~~ → [[<target>]] (merged YYYY-MM-DD)`. **Do NOT edit `00 HUB/00. PROGRAM DASHBOARD.md`** — per [[Dashboard Composition]] it is auto-regenerated from frontmatter by `generate_hierarchy_note.py` on the next `/session-close`; the merged brief's `status:`/`parent:` (and its archival) make the row reflow automatically. Manual dashboard edits would be wiped.
+- **Redirect stubs vs full link-rewrite (churn tradeoff).** The cascade above assumes you rewrite *every* active `[[<non-target>]]` link. If instead you rewrite only durable/active surfaces (conventions, skills, MOCs, live briefs, living indexes) and deliberately leave point-in-time notes (daily notes, reports, reviews) on the old name, you MUST drop a **bare-basename** redirect stub at `04 ARCHIVES/CLOSED PROJECTS/<non-target>.md` — the EXACT old basename, *not* the `(pre-merge YYYY-MM-DD)` archive name. Obsidian resolves `[[X]]` only to a file named exactly `X.md`, so the parenthetical archive snapshot does **not** catch bare `[[<non-target>]]` links — they would silently break. The stub carries `status: archived-merged` + `merged_into: "[[<target>]]"` + a one-line forward pointer; the descriptive "(renamed → …)" context goes in its H1/body, never the filename. Create it via Write-to-tmp → Bash `mv` (the `h1-vault-protection.sh` hook blocks Write directly into `04 ARCHIVES/`). **Rename variant:** if the merge ALSO renames the surviving target (absorb B into A while renaming A→C), the OLD target name (`A`) needs the same bare-basename stub so legacy `[[A]]` links resolve to C.
 - Append a Log entry on the merged brief AND the parent program brief documenting the merge.
 
 ### Rules for Merge Mode
@@ -616,6 +617,10 @@ Find all active vault references to `[[<non-target>]]` excluding `04 ARCHIVES/`,
 This pattern was applied twice in one session:
 1. **[[Bufalinda Vault]] → [[Bufalinda Company OS]]** — sibling sub-project absorbed; design fear ("unmaintainable central repository") shared between both; merge eliminated "two systems both claiming single source of truth" failure mode. Hook blocked post-move stamp; intent captured upstream in merge target's Working Notes "MERGE:" section.
 2. **[[Bufalinda AI Brain V0 Implementation]] (umbrella) → [[Bufalinda AI Brain V0]] (runtime)** — duplicate umbrella + runtime briefs; restored Manuel as `co_owner:`; absorbed runtime brief's U1-U6 phases + 12-row decisions table reference + project-specific AI Context into merged brief's Working Notes "Runtime Track" subsection; nested 4 newly-spawned sub-projects into merged folder.
+
+### Evidence (2026-06-17) — bare-basename redirect stubs + rename-and-absorb
+
+**Claude Code Crons + [[OpenClaw CRON Hardening]] → [[CRON Architecture]]** (cross-program merge: the OC child graduated up from [[OpenClaw Program]] to the SATORI-AI-Infrastructure level). Two refinements drove the M6 redirect-stub amendment above: (1) the merge **renamed** the survivor (Claude Code Crons → CRON Architecture), so the OLD survivor name *also* needed a bare-basename stub; (2) to avoid rewriting all ~125 inbound links, only ~27 durable surfaces were rewritten and point-in-time notes left on the old names — which only stays unbroken because bare-basename stubs (`Claude Code Crons.md`, `OpenClaw CRON Hardening.md`) resolve them. The first attempt used a descriptive `(renamed → … 2026-06-17).md` stub filename, which silently failed to catch bare `[[Claude Code Crons]]` links (caught mid-execution). The `(pre-merge 2026-06-17)` snapshot is kept *separately* as the full historical brief.
 
 Both merges followed the 6-step pattern exactly. The 2026-05-12 session also produced a Scan Brief at `00 HUB/00 INBOX/2026-05-12 - Bufalinda AI Consolidation Scan Brief.md` that codifies a Phase 3 spec mirroring this Merge Mode for the next focused consolidation session.
 
